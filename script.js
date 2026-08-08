@@ -32,7 +32,9 @@ fileInput.addEventListener('change', (e) => {
 
 function handleFiles(files) {
     for (let file of files) {
-        if (!file.type.startsWith('image/')) continue;
+        // Validar que sea imagen, si es iPhone a veces el tipo está vacío, lo dejamos pasar si no es explícitamente otro formato
+        if (file.type && !file.type.startsWith('image/')) continue;
+        
         selectedFiles.push(file);
         
         // Vista previa visual rápida
@@ -65,21 +67,23 @@ uploadForm.addEventListener('submit', async (e) => {
     for (let file of selectedFiles) {
         try {
             const base64Data = await toBase64(file);
-            const base64Clean = base64Data.split(',')[1];
+            const base64Clean = base64Data.split(',')[1]; // Quitar cabecera de la imagen
+
+            // Usar URLSearchParams es el truco para que Google no bloquee la petición
+            const formData = new URLSearchParams();
+            formData.append('base64', base64Clean);
+            formData.append('type', file.type || 'image/jpeg');
+            formData.append('name', file.name || 'foto');
 
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
-                body: JSON.stringify({
-                    base64: base64Clean,
-                    type: file.type,
-                    name: file.name
-                })
+                body: formData
             });
             
             const result = await response.json();
             if (result.status === 'success') successCount++;
         } catch (err) {
-            console.error(err);
+            console.error("Error subiendo archivo:", err);
         }
     }
 
@@ -90,7 +94,7 @@ uploadForm.addEventListener('submit', async (e) => {
         previewContainer.innerHTML = '';
         submitBtn.querySelector('span').textContent = 'Subir más fotos';
     } else {
-        statusMessage.textContent = 'Hubo un error al subir las fotos. Inténtalo de nuevo.';
+        statusMessage.textContent = 'Hubo un error al subir las fotos. Revisa tu conexión.';
         statusMessage.className = 'status-message error';
         submitBtn.disabled = false;
         submitBtn.querySelector('span').textContent = 'Reintentar';
