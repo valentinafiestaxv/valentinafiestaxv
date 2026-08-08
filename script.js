@@ -33,29 +33,43 @@ function handleFiles(files) {
 
 uploadForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (selectedFiles.length === 0) return;
+
     submitBtn.disabled = true;
-    submitBtn.querySelector('span').textContent = 'Subiendo...';
+    submitBtn.querySelector('span').textContent = 'Subiendo recuerdos... 📸';
+
+    let uploaded = 0;
 
     for (let file of selectedFiles) {
-        const base64Data = await new Promise(r => {
-            let f = new FileReader();
-            f.onload = e => r(e.target.result);
-            f.readAsDataURL(file);
-        });
+        try {
+            const base64Data = await new Promise(r => {
+                let f = new FileReader();
+                f.onload = e => r(e.target.result);
+                f.readAsDataURL(file);
+            });
 
-        await fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                base64: base64Data.split(',')[1],
-                type: file.type,
-                name: file.name
-            })
-        });
+            // Usamos mode: 'no-cors' para evitar que el navegador bloquee la petición por seguridad
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8',
+                },
+                body: JSON.stringify({
+                    base64: base64Data.split(',')[1],
+                    type: file.type,
+                    name: file.name
+                })
+            });
+            uploaded++;
+        } catch (err) {
+            console.error(err);
+        }
     }
 
-    statusMessage.textContent = "¡Fotos subidas con éxito!";
+    statusMessage.textContent = `¡Listo! Se procesaron ${uploaded} foto(s). Revisa tu Google Drive. ✨`;
     statusMessage.className = "status-message success";
-    submitBtn.querySelector('span').textContent = "Subir más";
+    submitBtn.querySelector('span').textContent = "Subir más fotos";
     submitBtn.disabled = false;
     selectedFiles = [];
     previewContainer.innerHTML = '';
