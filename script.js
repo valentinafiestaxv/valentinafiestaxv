@@ -1,4 +1,4 @@
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9M1IHk7QeI0RIr2s0ZyNKcHR3ntNgBPaSDZqWUKNz25-PLq5fL1J4QL0xwBErZrt6/exec"; 
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9M1IHk7QeI0RIr2s0ZyNKcHR3ntNgBPaSDZqWUKNz25-PLq5fL1J4QL0xwBErZrt6/exec";
 
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
@@ -35,7 +35,6 @@ function handleFiles(files) {
         if (!file.type.startsWith('image/')) continue;
         selectedFiles.push(file);
         
-        // Vista previa visual rápida
         const reader = new FileReader();
         reader.onload = (e) => {
             const div = document.createElement('div');
