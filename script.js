@@ -48,21 +48,39 @@ uploadForm.addEventListener('submit', async (e) => {
                 f.readAsDataURL(file);
             });
 
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    base64: base64Data.split(',')[1],
-                    type: file.type,
-                    name: file.name
-                })
+            const payload = JSON.stringify({
+                base64: base64Data.split(',')[1],
+                type: file.type,
+                name: file.name
             });
+
+            // Usamos un formulario oculto dinámico que no activa las políticas de CORS del fetch
+            await new Promise((resolve) => {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = SCRIPT_URL;
+                form.target = '_blank';
+
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'data';
+                input.value = payload;
+
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+                form.remove();
+
+                setTimeout(resolve, 1000);
+            });
+
             uploadedCount++;
         } catch (err) {
-            console.error("Error al subir archivo:", err);
+            console.error("Error al procesar archivo:", err);
         }
     }
 
-    statusMessage.textContent = `¡Listo! Se subieron ${uploadedCount} foto(s) al Drive de Valentina. ✨`;
+    statusMessage.textContent = `¡Listo! Se procesaron ${uploadedCount} foto(s). Revísalas en tu Google Drive. ✨`;
     statusMessage.className = "status-message success";
     submitBtn.querySelector('span').textContent = "Subir más fotos";
     submitBtn.disabled = false;
