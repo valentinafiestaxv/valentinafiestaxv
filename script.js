@@ -1,4 +1,4 @@
-const SCRIPT_URL = "https://script.google.com/macros/library/d/1Io7k2y-hdam_3C22HTcaLKux-KIQSxurJRIU6OeFG8V88OFgQm9dS84C/6"; 
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz58Q4JqHuFF_iGwk_Rtr4NVXRhTwXH7OBGCPXNm_WRBodVwQ9H3AXWPr-vcWXFhTdfUA/exec"; 
 
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
