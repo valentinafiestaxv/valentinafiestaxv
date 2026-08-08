@@ -1,70 +1,105 @@
-// PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxGBJcFjnwyspm1GUlX4EYYZorBcOGRGKuSvdxDJpZdxDI6UC6PZPV1RHG8GFU0Dg-30w/exec';
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxGBJcFjnwyspm1GUlX4EYYZorBcOGRGKuSvdxDJpZdxDI6UC6PZPV1RHG8GFU0Dg-30w/exec"; 
 
-const form = document.getElementById('uploadForm');
+const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
-const fileNameLabel = document.getElementById('fileName');
-const loader = document.getElementById('loader');
-const successMessage = document.getElementById('successMessage');
+const uploadForm = document.getElementById('uploadForm');
+const submitBtn = document.getElementById('submitBtn');
+const previewContainer = document.getElementById('previewContainer');
+const statusMessage = document.getElementById('statusMessage');
 
-// Cambiar el texto cuando eligen una foto
-fileInput.addEventListener('change', function() {
-    if (this.files && this.files.length > 0) {
-        fileNameLabel.textContent = "¡Foto seleccionada lista! ✅";
-        fileNameLabel.style.color = "#d4af37";
+let selectedFiles = [];
+
+dropZone.addEventListener('click', () => fileInput.click());
+
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+});
+
+dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('dragover');
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files);
+});
+
+fileInput.addEventListener('change', (e) => {
+    handleFiles(e.target.files);
+});
+
+function handleFiles(files) {
+    for (let file of files) {
+        if (!file.type.startsWith('image/')) continue;
+        selectedFiles.push(file);
+        
+        // Vista previa visual rápida
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const div = document.createElement('div');
+            div.className = 'preview-item';
+            div.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+            previewContainer.appendChild(div);
+        }
+        reader.readAsDataURL(file);
+    }
+    
+    if (selectedFiles.length > 0) {
+        submitBtn.disabled = false;
+        submitBtn.querySelector('span').textContent = `Subir ${selectedFiles.length} foto(s)`;
+    }
+}
+
+uploadForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (selectedFiles.length === 0) return;
+
+    submitBtn.disabled = true;
+    submitBtn.querySelector('span').textContent = 'Subiendo recuerdos... 📸';
+    statusMessage.className = 'status-message hidden';
+
+    let successCount = 0;
+
+    for (let file of selectedFiles) {
+        try {
+            const base64Data = await toBase64(file);
+            const base64Clean = base64Data.split(',')[1];
+
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    base64: base64Clean,
+                    type: file.type,
+                    name: file.name
+                })
+            });
+            
+            const result = await response.json();
+            if (result.status === 'success') successCount++;
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    if (successCount > 0) {
+        statusMessage.textContent = `¡Listo! Se subieron ${successCount} fotos exitosamente a la carpeta de Valentina. ✨`;
+        statusMessage.className = 'status-message success';
+        selectedFiles = [];
+        previewContainer.innerHTML = '';
+        submitBtn.querySelector('span').textContent = 'Subir más fotos';
     } else {
-        fileNameLabel.textContent = "Toca para elegir una foto 📷";
-        fileNameLabel.style.color = "white";
+        statusMessage.textContent = 'Hubo un error al subir las fotos. Inténtalo de nuevo.';
+        statusMessage.className = 'status-message error';
+        submitBtn.disabled = false;
+        submitBtn.querySelector('span').textContent = 'Reintentar';
     }
 });
 
-form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const file = fileInput.files[0];
-    if (!file) {
-        alert('Por favor, selecciona una foto primero.');
-        return;
-    }
-
-    // Ocultar formulario, mostrar carga
-    form.style.display = 'none';
-    loader.style.display = 'block';
-
+const toBase64 = file => new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
-    reader.onload = function(event) {
-        // Extraer solo la parte base64 de la imagen
-        const base64Data = event.target.result.split(',')[1];
-        
-        // Preparar los datos a enviar
-        const formData = new URLSearchParams();
-        formData.append('fileContent', base64Data);
-        formData.append('filename', 'XV_Valentina_' + new Date().getTime() + '_' + file.name);
-        formData.append('mimetype', file.type);
-
-        // Enviar al Apps Script
-        fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(result => {
-            loader.style.display = 'none';
-            if(result.result === 'success') {
-                successMessage.style.display = 'block';
-            } else {
-                alert('Hubo un error guardando la foto. Intenta de nuevo.');
-                form.style.display = 'block';
-            }
-        })
-        .catch(error => {
-            loader.style.display = 'none';
-            alert('Error de conexión. Revisa tu internet.');
-            form.style.display = 'block';
-        });
-    };
-    
-    // Leer el archivo como Base64
     reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
 });
