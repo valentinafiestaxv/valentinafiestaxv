@@ -83,7 +83,7 @@ uploadForm.addEventListener('submit', async (e) => {
             const result = await response.json();
             if (result.status === 'success') successCount++;
         } catch (err) {
-            console.error("Error subiendo archivo:", err);
+            alert("El error técnico es: " + err.message);
         }
     }
 
