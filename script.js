@@ -1,4 +1,4 @@
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz58Q4JqHuFF_iGwk_Rtr4NVXRhTwXH7OBGCPXNm_WRBodVwQ9H3AXWPr-vcWXFhTdfUA/exec"; 
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxGBJcFjnwyspm1GUlX4EYYZorBcOGRGKuSvdxDJpZdxDI6UC6PZPV1RHG8GFU0Dg-30w/exec"; 
 
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
@@ -6,6 +6,7 @@ const uploadForm = document.getElementById('uploadForm');
 const submitBtn = document.getElementById('submitBtn');
 const previewContainer = document.getElementById('previewContainer');
 const statusMessage = document.getElementById('statusMessage');
+const guestNameInput = document.getElementById('guestName');
 
 let selectedFiles = [];
 
@@ -32,12 +33,10 @@ fileInput.addEventListener('change', (e) => {
 
 function handleFiles(files) {
     for (let file of files) {
-        // Validar que sea imagen, si es iPhone a veces el tipo está vacío, lo dejamos pasar si no es explícitamente otro formato
         if (file.type && !file.type.startsWith('image/')) continue;
         
         selectedFiles.push(file);
         
-        // Vista previa visual rápida
         const reader = new FileReader();
         reader.onload = (e) => {
             const div = document.createElement('div');
@@ -64,16 +63,22 @@ uploadForm.addEventListener('submit', async (e) => {
 
     let successCount = 0;
 
+    let guestName = guestNameInput.value.trim();
+    if (guestName === "") {
+        guestName = "Fiesta";
+    } else {
+        guestName = guestName.replace(/\s+/g, '_');
+    }
+
     for (let file of selectedFiles) {
         try {
             const base64Data = await toBase64(file);
-            const base64Clean = base64Data.split(',')[1]; // Quitar cabecera de la imagen
+            const base64Clean = base64Data.split(',')[1];
 
-            // Usar URLSearchParams es el truco para que Google no bloquee la petición
             const formData = new URLSearchParams();
             formData.append('base64', base64Clean);
             formData.append('type', file.type || 'image/jpeg');
-            formData.append('name', file.name || 'foto');
+            formData.append('name', guestName);
 
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
@@ -83,7 +88,7 @@ uploadForm.addEventListener('submit', async (e) => {
             const result = await response.json();
             if (result.status === 'success') successCount++;
         } catch (err) {
-            console.error("Error subiendo archivo:", err);
+            alert("El error técnico es: " + err.message);
         }
     }
 
@@ -94,7 +99,7 @@ uploadForm.addEventListener('submit', async (e) => {
         previewContainer.innerHTML = '';
         submitBtn.querySelector('span').textContent = 'Subir más fotos';
     } else {
-        statusMessage.textContent = 'Hubo un error al subir las fotos. Revisa tu conexión.';
+        statusMessage.textContent = 'Hubo un error al subir las fotos. Inténtalo de nuevo.';
         statusMessage.className = 'status-message error';
         submitBtn.disabled = false;
         submitBtn.querySelector('span').textContent = 'Reintentar';
