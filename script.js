@@ -51,7 +51,6 @@ uploadForm.addEventListener('submit', async (e) => {
             name: file.name
         });
 
-        // Envío mediante formulario dinámico oculto (Cero bloqueos de CORS)
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = SCRIPT_URL;
