@@ -7,13 +7,15 @@ const submitBtn = document.getElementById('submitBtn');
 const previewContainer = document.getElementById('previewContainer');
 const statusMessage = document.getElementById('statusMessage');
 
+let selectedFiles = [];
+
 dropZone.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
 
 function handleFiles(files) {
-    previewContainer.innerHTML = '';
     for (let file of files) {
         if (!file.type.startsWith('image/')) continue;
+        selectedFiles.push(file);
         const reader = new FileReader();
         reader.onload = (e) => {
             const div = document.createElement('div');
@@ -23,32 +25,37 @@ function handleFiles(files) {
         }
         reader.readAsDataURL(file);
     }
-    if (files.length > 0) {
+    if (selectedFiles.length > 0) {
         submitBtn.disabled = false;
-        submitBtn.querySelector('span').textContent = `Subir ${files.length} foto(s)`;
+        submitBtn.querySelector('span').textContent = `Subir ${selectedFiles.length} foto(s)`;
     }
 }
 
 uploadForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const files = fileInput.files;
-    if (files.length === 0) return;
+    if (selectedFiles.length === 0) return;
 
     submitBtn.disabled = true;
-    submitBtn.querySelector('span').textContent = 'Preparando fotos... 📸';
+    submitBtn.querySelector('span').textContent = 'Subiendo recuerdos... 📸';
 
-    for (let file of files) {
+    for (let file of selectedFiles) {
         const base64Data = await new Promise(r => {
             let f = new FileReader();
             f.onload = event => r(event.target.result);
             f.readAsDataURL(file);
         });
 
-        // Creamos un formulario dinámico directo al script de Google
+        // Creamos un iframe invisible para evitar que se abran pestañas nuevas
+        const iframeName = 'hidden_iframe_' + Date.now();
+        const iframe = document.createElement('iframe');
+        iframe.name = iframeName;
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = SCRIPT_URL;
-        form.target = '_blank'; // Se abre una pestaña invisible o rápida que procesa el envío
+        form.target = iframeName;
 
         const input = document.createElement('input');
         input.type = 'hidden';
@@ -62,13 +69,18 @@ uploadForm.addEventListener('submit', async (e) => {
         form.appendChild(input);
         document.body.appendChild(form);
         form.submit();
-        form.remove();
+
+        // Limpiamos los elementos creados después de 3 segundos
+        setTimeout(() => {
+            form.remove();
+            iframe.remove();
+        }, 3000);
     }
 
-    statusMessage.textContent = "¡Proceso finalizado! Revisa tu Google Drive para ver las fotos. ✨";
+    statusMessage.textContent = "¡Fotos subidas con éxito! Ya están en el Drive. ✨";
     statusMessage.className = "status-message success";
     submitBtn.querySelector('span').textContent = "Subir más fotos";
     submitBtn.disabled = false;
+    selectedFiles = [];
     previewContainer.innerHTML = '';
-    fileInput.value = '';
 });
