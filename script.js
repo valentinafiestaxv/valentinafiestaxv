@@ -38,46 +38,31 @@ uploadForm.addEventListener('submit', async (e) => {
     submitBtn.disabled = true;
     submitBtn.querySelector('span').textContent = 'Subiendo recuerdos... 📸';
 
+    let uploadedCount = 0;
+
     for (let file of selectedFiles) {
-        const base64Data = await new Promise(r => {
-            let f = new FileReader();
-            f.onload = event => r(event.target.result);
-            f.readAsDataURL(file);
-        });
+        try {
+            const base64Data = await new Promise(r => {
+                let f = new FileReader();
+                f.onload = event => r(event.target.result);
+                f.readAsDataURL(file);
+            });
 
-        // Creamos un iframe invisible para evitar que se abran pestañas nuevas
-        const iframeName = 'hidden_iframe_' + Date.now();
-        const iframe = document.createElement('iframe');
-        iframe.name = iframeName;
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = SCRIPT_URL;
-        form.target = iframeName;
-
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'data';
-        input.value = JSON.stringify({
-            base64: base64Data.split(',')[1],
-            type: file.type,
-            name: file.name
-        });
-
-        form.appendChild(input);
-        document.body.appendChild(form);
-        form.submit();
-
-        // Limpiamos los elementos creados después de 3 segundos
-        setTimeout(() => {
-            form.remove();
-            iframe.remove();
-        }, 3000);
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    base64: base64Data.split(',')[1],
+                    type: file.type,
+                    name: file.name
+                })
+            });
+            uploadedCount++;
+        } catch (err) {
+            console.error("Error al subir archivo:", err);
+        }
     }
 
-    statusMessage.textContent = "¡Fotos subidas con éxito! Ya están en el Drive. ✨";
+    statusMessage.textContent = `¡Listo! Se subieron ${uploadedCount} foto(s) al Drive de Valentina. ✨`;
     statusMessage.className = "status-message success";
     submitBtn.querySelector('span').textContent = "Subir más fotos";
     submitBtn.disabled = false;
