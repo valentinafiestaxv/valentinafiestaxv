@@ -1,4 +1,4 @@
-const SCRIPT_URL = "PEGAR_AQUI_LA_URL_DE_GOOGLE_APPS_SCRIPT"; 
+const SCRIPT_URL = https://script.google.com/macros/s/AKfycbx9M1IHk7QeI0RIr2s0ZyNKcHR3ntNgBPaSDZqWUKNz25-PLq5fL1J4QL0xwBErZrt6/exec; 
 
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
