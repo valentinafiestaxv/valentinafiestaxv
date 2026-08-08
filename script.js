@@ -38,49 +38,37 @@ uploadForm.addEventListener('submit', async (e) => {
     submitBtn.disabled = true;
     submitBtn.querySelector('span').textContent = 'Subiendo recuerdos... 📸';
 
-    let uploadedCount = 0;
-
     for (let file of selectedFiles) {
-        try {
-            const base64Data = await new Promise(r => {
-                let f = new FileReader();
-                f.onload = event => r(event.target.result);
-                f.readAsDataURL(file);
-            });
+        const base64Data = await new Promise(r => {
+            let f = new FileReader();
+            f.onload = event => r(event.target.result);
+            f.readAsDataURL(file);
+        });
 
-            const payload = JSON.stringify({
-                base64: base64Data.split(',')[1],
-                type: file.type,
-                name: file.name
-            });
+        const payload = JSON.stringify({
+            base64: base64Data.split(',')[1],
+            type: file.type,
+            name: file.name
+        });
 
-            // Usamos un formulario oculto dinámico que no activa las políticas de CORS del fetch
-            await new Promise((resolve) => {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = SCRIPT_URL;
-                form.target = '_blank';
+        // Envío mediante formulario dinámico oculto (Cero bloqueos de CORS)
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = SCRIPT_URL;
+        form.target = '_blank';
 
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'data';
-                input.value = payload;
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'data';
+        input.value = payload;
 
-                form.appendChild(input);
-                document.body.appendChild(form);
-                form.submit();
-                form.remove();
-
-                setTimeout(resolve, 1000);
-            });
-
-            uploadedCount++;
-        } catch (err) {
-            console.error("Error al procesar archivo:", err);
-        }
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+        form.remove();
     }
 
-    statusMessage.textContent = `¡Listo! Se procesaron ${uploadedCount} foto(s). Revísalas en tu Google Drive. ✨`;
+    statusMessage.textContent = "¡Listo! Fotos enviadas al Drive de Valentina. ✨";
     statusMessage.className = "status-message success";
     submitBtn.querySelector('span').textContent = "Subir más fotos";
     submitBtn.disabled = false;
