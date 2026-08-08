@@ -63,8 +63,8 @@ uploadForm.addEventListener('submit', async (e) => {
 
     for (let file of selectedFiles) {
         try {
-            const base64Data = await toBase64(file);
-            const base64Clean = base64Data.split(',')[1];
+            const base64Data = toBase64(file);
+            const base64Clean = (await base64Data).split(',')[1];
 
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
