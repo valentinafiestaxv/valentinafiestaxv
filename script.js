@@ -80,6 +80,7 @@ uploadForm.addEventListener('submit', async (e) => {
             formData.append('type', file.type || 'image/jpeg');
             formData.append('name', guestName);
 
+            // CORREGIDO: Ya no tiene la "y" antes de await
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
                 body: formData
@@ -88,6 +89,7 @@ uploadForm.addEventListener('submit', async (e) => {
             const result = await response.json();
             if (result.status === 'success') successCount++;
         } catch (err) {
+            console.error("Error técnico:", err);
             alert("El error técnico es: " + err.message);
         }
     }
