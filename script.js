@@ -22,14 +22,21 @@ fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
 
 function handleFiles(files) {
     for (let file of files) {
-        if (file.type && !file.type.startsWith('image/')) continue;
+        // Valida que sea imagen o video
+        if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) continue;
+        
         selectedFiles.push(file);
         
         const reader = new FileReader();
         reader.onload = (e) => {
             const div = document.createElement('div');
             div.className = 'preview-item';
-            div.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+            
+            if (file.type.startsWith('video/')) {
+                div.innerHTML = `<video src="${e.target.result}" muted></video>`;
+            } else {
+                div.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+            }
             previewContainer.appendChild(div);
         }
         reader.readAsDataURL(file);
@@ -37,7 +44,7 @@ function handleFiles(files) {
     
     if (selectedFiles.length > 0) {
         submitBtn.disabled = false;
-        submitBtn.querySelector('span').textContent = `Subir ${selectedFiles.length} foto(s)`;
+        submitBtn.querySelector('span').textContent = `Subir ${selectedFiles.length} archivo(s)`;
     }
 }
 
@@ -46,7 +53,7 @@ uploadForm.addEventListener('submit', async (e) => {
     if (selectedFiles.length === 0) return;
 
     submitBtn.disabled = true;
-    submitBtn.querySelector('span').textContent = 'Subiendo recuerdos... 📸';
+    submitBtn.querySelector('span').textContent = 'Subiendo recuerdos... 🎥';
     statusMessage.className = 'status-message hidden';
 
     let guestName = guestNameInput.value.trim() || "Fiesta";
@@ -54,21 +61,28 @@ uploadForm.addEventListener('submit', async (e) => {
 
     try {
         let successCount = 0;
+        const batchSize = 3; // Lotes pequeños ideales para procesar videos sin congelar
 
-        // Subimos en bloques de 5 en 5 simultáneamente para volar sin saturar
-        const batchSize = 5;
         for (let i = 0; i < selectedFiles.length; i += batchSize) {
             const batch = selectedFiles.slice(i, i + batchSize);
             
             const batchPromises = batch.map(async (file) => {
                 try {
-                    // Comprimimos la imagen antes de pasarla a Base64
-                    const compressedBase64 = await resizeAndCompressImage(file, 1200, 0.75);
-                    const base64Clean = compressedBase64.split(',')[1]; 
+                    let base64Data = "";
+                    
+                    if (file.type.startsWith('image/')) {
+                        // Comprimir imagen para que vuele
+                        base64Data = await resizeAndCompressImage(file, 1200, 0.75);
+                    } else {
+                        // Si es video, lo leemos directamente
+                        base64Data = await toBase64(file);
+                    }
+
+                    const base64Clean = base64Data.split(',')[1]; 
 
                     const formData = new URLSearchParams();
                     formData.append('base64', base64Clean);
-                    formData.append('type', 'image/jpeg'); // Forzamos jpeg comprimido
+                    formData.append('type', file.type);
                     formData.append('name', guestName);
 
                     const response = await fetch(SCRIPT_URL, {
@@ -89,25 +103,31 @@ uploadForm.addEventListener('submit', async (e) => {
         }
 
         if (successCount > 0) {
-            statusMessage.textContent = `¡Listo! Se subieron ${successCount} fotos exitosamente. ✨`;
+            statusMessage.textContent = `¡Listo! Se subieron ${successCount} archivos exitosamente. ✨`;
             statusMessage.className = 'status-message success';
             selectedFiles = [];
             previewContainer.innerHTML = '';
-            submitBtn.querySelector('span').textContent = 'Subir más fotos';
+            submitBtn.querySelector('span').textContent = 'Subir más recuerdos';
         } else {
-            throw new Error("No se pudo subir ninguna foto.");
+            throw new Error("No se pudo subir ningún archivo.");
         }
 
     } catch (err) {
         console.error("Error general:", err);
-        statusMessage.textContent = 'Hubo un error al subir las fotos. Revisa tu conexión.';
+        statusMessage.textContent = 'Hubo un error al subir los archivos. Revisa tu conexión.';
         statusMessage.className = 'status-message error';
         submitBtn.disabled = false;
         submitBtn.querySelector('span').textContent = 'Reintentar';
     }
 });
 
-// Función mágica para comprimir y reducir la foto antes de enviarla
+const toBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+});
+
 const resizeAndCompressImage = (file, maxDimension, quality) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -137,7 +157,6 @@ const resizeAndCompressImage = (file, maxDimension, quality) => {
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
 
-                // Exporta a JPEG comprimido
                 resolve(canvas.toDataURL('image/jpeg', quality));
             };
             img.onerror = (error) => reject(error);
