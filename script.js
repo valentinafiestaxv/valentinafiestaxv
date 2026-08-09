@@ -6,6 +6,7 @@ const uploadForm = document.getElementById('uploadForm');
 const submitBtn = document.getElementById('submitBtn');
 const previewContainer = document.getElementById('previewContainer');
 const statusMessage = document.getElementById('statusMessage');
+const guestNameInput = document.getElementById('guestName'); // <-- Aquí se conecta con el campo de texto del HTML
 
 let selectedFiles = [];
 
@@ -32,12 +33,10 @@ fileInput.addEventListener('change', (e) => {
 
 function handleFiles(files) {
     for (let file of files) {
-        // Validar que sea imagen, si es iPhone a veces el tipo está vacío, lo dejamos pasar si no es explícitamente otro formato
         if (file.type && !file.type.startsWith('image/')) continue;
         
         selectedFiles.push(file);
         
-        // Vista previa visual rápida
         const reader = new FileReader();
         reader.onload = (e) => {
             const div = document.createElement('div');
@@ -64,16 +63,24 @@ uploadForm.addEventListener('submit', async (e) => {
 
     let successCount = 0;
 
+    // --- AQUÍ ES DONDE RECOGE EL NOMBRE O APODO ---
+    let guestName = guestNameInput.value.trim();
+    if (guestName === "") {
+        guestName = "Fiesta"; // Si no escribe nada, se llamará "Fiesta"
+    } else {
+        guestName = guestName.replace(/\s+/g, '_'); // Reemplaza espacios por guiones bajos
+    }
+    // ---------------------------------------------
+
     for (let file of selectedFiles) {
         try {
             const base64Data = await toBase64(file);
-            const base64Clean = base64Data.split(',')[1]; // Quitar cabecera de la imagen
+            const base64Clean = base64Data.split(',')[1]; 
 
-            // Usar URLSearchParams es el truco para que Google no bloquee la petición
             const formData = new URLSearchParams();
             formData.append('base64', base64Clean);
             formData.append('type', file.type || 'image/jpeg');
-            formData.append('name', file.name || 'foto');
+            formData.append('name', guestName); // <-- Aquí envía el nombre capturado a Google
 
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
