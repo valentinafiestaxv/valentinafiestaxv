@@ -1,11 +1,11 @@
 :root {
-    --bg-color: #FFC7EB; /* Fondo rosa pastel solicitado */
-    --card-bg: rgba(255, 255, 255, 0.85); /* Tarjeta estilo vidrio translúcido blanco */
-    --primary: #9b2d72; /* Color principal de acento (contraste fuerte con el fondo rosa) */
+    --bg-color: #FFC7EB;
+    --card-bg: rgba(255, 255, 255, 0.88);
+    --primary: #9b2d72;
     --primary-hover: #7a2258;
-    --text-main: #3b142c; /* Letras principales oscuras para legibilidad */
-    --text-muted: #6e3d5b; /* Letras secundarias */
-    --border: rgba(155, 45, 114, 0.2);
+    --text-main: #3b142c;
+    --text-muted: #6e3d5b;
+    --border: rgba(155, 45, 114, 0.25);
     --radius: 16px;
 }
 
@@ -17,7 +17,13 @@
 
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background-color: var(--bg-color);
+    /* Fondo con foto translúcida y capa rosa por encima */
+    background: linear-gradient(rgba(255, 199, 235, 0.85), rgba(255, 199, 235, 0.85)), url('quince.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    
     color: var(--text-main);
     min-height: 100vh;
     display: flex;
@@ -57,22 +63,25 @@ body {
     font-family: 'Playfair Display', serif;
     font-style: italic;
     color: var(--primary);
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     letter-spacing: 1px;
     font-weight: 600;
 }
 
+/* TÍTULO MÁS GRANDE Y CON ANIMACIÓN FLOTANTE */
 .header h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 2.5rem;
-    font-weight: 600;
+    font-size: 3.5rem;
+    font-weight: 700;
     margin: 0.2rem 0 0.6rem 0;
     color: var(--text-main);
+    text-shadow: 0 2px 12px rgba(255, 255, 255, 0.8);
+    animation: float 3s ease-in-out infinite;
 }
 
 .header p {
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     line-height: 1.5;
     padding: 0 0.5rem;
 }
@@ -131,7 +140,7 @@ body {
 .input-group input {
     width: 100%;
     padding: 0.85rem 1rem;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.95);
     border: 1px solid rgba(155, 45, 114, 0.3);
     border-radius: 10px;
     color: var(--text-main);
@@ -220,4 +229,11 @@ footer {
     color: var(--text-muted);
     font-size: 0.85rem;
     margin-top: 2rem;
+    text-shadow: 0 1px 4px rgba(255, 255, 255, 0.5);
+}
+
+/* ANIMACIÓN FLOTANTE */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
 }
