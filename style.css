@@ -15,19 +15,20 @@
     padding: 0;
 }
 
+html {
+    height: 100%;
+}
+
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    
-    /* FOTO DE FONDO DINÁMICA: Centrada arriba para que siempre se vea la cara */
+    /* Fondo adaptable que cubre toda la pantalla sin cortarse */
     background: linear-gradient(rgba(255, 199, 235, 0.85), rgba(255, 199, 235, 0.85)), url('quince.jpg');
     background-size: cover;
-    background-position: center top; /* <-- AQUÍ ESTÁ EL TRUCO PARA EL MÓVIL (enfoca la cara) */
+    background-position: center top;
     background-repeat: no-repeat;
-    background-attachment: fixed;
-    animation: bgZoom 20s ease-in-out infinite alternate; /* Efecto dinámico de zoom lento */
+    min-height: 100%;
     
     color: var(--text-main);
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -55,7 +56,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    z-index: 2; /* Asegura que esté por encima del fondo */
+    z-index: 2;
+    margin: auto 0; /* Centra el contenido perfectamente vertical en cualquier pantalla */
 }
 
 .header {
@@ -71,10 +73,10 @@ body {
     font-weight: 600;
 }
 
-/* TÍTULO CON ANIMACIÓN FLOTANTE */
+/* TÍTULO FLOTANTE */
 .header h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 3.5rem;
+    font-size: 3.2rem;
     font-weight: 700;
     margin: 0.2rem 0 0.6rem 0;
     color: var(--text-main);
@@ -168,7 +170,7 @@ body {
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
-    transition: background 0.3s, transform 0.2s;
+    transition: background 0.30s, transform 0.2s;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -231,7 +233,7 @@ footer {
     text-align: center;
     color: var(--text-muted);
     font-size: 0.85rem;
-    margin-top: 2rem;
+    margin-top: 1.5rem;
     text-shadow: 0 1px 4px rgba(255, 255, 255, 0.5);
     z-index: 2;
 }
@@ -239,10 +241,5 @@ footer {
 /* --- ANIMACIONES --- */
 @keyframes float {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
-}
-
-@keyframes bgZoom {
-    0% { background-size: 100% auto; }
-    100% { background-size: 115% auto; }
+    50% { transform: translateY(-6px); }
 }
