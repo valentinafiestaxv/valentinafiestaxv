@@ -29,7 +29,6 @@ body {
     overflow-x: hidden;
 }
 
-/* CAPA DE FONDO: Fija la foto arriba y difumina con el rosa translúcido de forma infinita */
 body::before {
     content: "";
     position: absolute;
@@ -80,7 +79,6 @@ body::before {
     font-weight: 600;
 }
 
-/* TÍTULO CON ANIMACIÓN FLOTANTE */
 .header h1 {
     font-family: 'Playfair Display', serif;
     font-size: 3.5rem;
@@ -204,9 +202,10 @@ body::before {
     overflow: hidden;
     position: relative;
     border: 1px solid rgba(155, 45, 114, 0.2);
+    background: #000;
 }
 
-.preview-item img {
+.preview-item img, .preview-item video {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -245,7 +244,6 @@ footer {
     z-index: 2;
 }
 
-/* --- ANIMACIONES --- */
 @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-8px); }
