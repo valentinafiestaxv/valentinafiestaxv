@@ -18,10 +18,10 @@
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
     
-    /* FONDO PERFECTO: Centrado absoluto, cubriendo toda la pantalla y con zoom dinámico */
+    /* FONDO PERFECTO: Anclado arriba y centrado a lo ancho, cubriendo toda la pantalla con zoom dinámico */
     background: linear-gradient(rgba(255, 199, 235, 0.85), rgba(255, 199, 235, 0.85)), url('quince.jpg');
     background-size: cover;
-    background-position: center center; /* <-- Centrado total para que se adapte perfecto */
+    background-position: top center; /* <-- ANCLADO ARRIBA Y CENTRADO A LO ANCHO */
     background-repeat: no-repeat;
     background-attachment: fixed;
     animation: bgZoom 25s ease-in-out infinite alternate;
@@ -242,6 +242,11 @@ footer {
 @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-8px); }
+}
+
+@keyframes bgZoom {
+    0% { background-size: 100% auto; }
+    100% { background-size: 112% auto; }
 }
 
 @keyframes bgZoom {
