@@ -17,15 +17,7 @@
 
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    
-    /* FONDO PERFECTO: Anclado arriba y centrado a lo ancho, cubriendo toda la pantalla con zoom dinámico */
-    background: linear-gradient(rgba(255, 199, 235, 0.85), rgba(255, 199, 235, 0.85)), url('quince.jpg');
-    background-size: cover;
-    background-position: top center; /* <-- ANCLADO ARRIBA Y CENTRADO A LO ANCHO */
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    animation: bgZoom 25s ease-in-out infinite alternate;
-    
+    background-color: var(--bg-color);
     color: var(--text-main);
     min-height: 100vh;
     display: flex;
@@ -35,6 +27,21 @@ body {
     padding: 2rem 1rem;
     position: relative;
     overflow-x: hidden;
+}
+
+/* CAPA DE FONDO: Fija la foto arriba y difumina con el rosa translúcido de forma infinita */
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(rgba(255, 199, 235, 0.82), rgba(255, 199, 235, 0.95)), url('quince.jpg');
+    background-size: cover;
+    background-position: top center;
+    background-repeat: no-repeat;
+    z-index: -2;
 }
 
 .background-glow {
@@ -242,14 +249,4 @@ footer {
 @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-8px); }
-}
-
-@keyframes bgZoom {
-    0% { background-size: 100% auto; }
-    100% { background-size: 112% auto; }
-}
-
-@keyframes bgZoom {
-    0% { background-size: 100% auto; }
-    100% { background-size: 112% auto; }
 }
