@@ -1,11 +1,11 @@
 :root {
-    --bg-color: #0c0a09;
-    --card-bg: rgba(28, 25, 23, 0.7);
-    --primary: #d4af37; /* Dorado elegante */
-    --primary-hover: #e5c158;
-    --text-main: #f5f5f4;
-    --text-muted: #a8a29e;
-    --border: rgba(212, 175, 55, 0.2);
+    --bg-color: #FFC7EB; /* Fondo rosa pastel solicitado */
+    --card-bg: rgba(255, 255, 255, 0.85); /* Tarjeta estilo vidrio translúcido blanco */
+    --primary: #9b2d72; /* Color principal de acento (contraste fuerte con el fondo rosa) */
+    --primary-hover: #7a2258;
+    --text-main: #3b142c; /* Letras principales oscuras para legibilidad */
+    --text-muted: #6e3d5b; /* Letras secundarias */
+    --border: rgba(155, 45, 114, 0.2);
     --radius: 16px;
 }
 
@@ -24,19 +24,20 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    padding: 2rem 1rem;
+    padding: 1.5rem 1rem;
     position: relative;
     overflow-x: hidden;
 }
 
 .background-glow {
     position: absolute;
-    top: -20%;
+    top: -10%;
     left: 50%;
     transform: translateX(-50%);
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, rgba(0,0,0,0) 70%);
+    width: 100%;
+    max-width: 600px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, rgba(0,0,0,0) 70%);
     z-index: -1;
 }
 
@@ -45,7 +46,7 @@ body {
     max-width: 500px;
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.5rem;
 }
 
 .header {
@@ -56,24 +57,24 @@ body {
     font-family: 'Playfair Display', serif;
     font-style: italic;
     color: var(--primary);
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     letter-spacing: 1px;
+    font-weight: 600;
 }
 
 .header h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 3rem;
+    font-size: 2.5rem;
     font-weight: 600;
-    margin: 0.2rem 0 0.8rem 0;
-    background: linear-gradient(135deg, #fff 30%, var(--primary) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    margin: 0.2rem 0 0.6rem 0;
+    color: var(--text-main);
 }
 
 .header p {
     color: var(--text-muted);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     line-height: 1.5;
+    padding: 0 0.5rem;
 }
 
 .upload-card {
@@ -81,44 +82,45 @@ body {
     backdrop-filter: blur(12px);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 1.5rem;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    padding: 1.25rem;
+    box-shadow: 0 20px 40px rgba(155, 45, 114, 0.15);
 }
 
 .drop-zone {
-    border: 2px dashed var(--border);
+    border: 2px dashed var(--primary);
     border-radius: 12px;
-    padding: 2.5rem 1rem;
+    padding: 2rem 1rem;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    background: rgba(255, 255, 255, 0.01);
+    background: rgba(255, 255, 255, 0.5);
 }
 
 .drop-zone:hover, .drop-zone.dragover {
-    border-color: var(--primary);
-    background: rgba(212, 175, 55, 0.03);
+    border-color: var(--primary-hover);
+    background: rgba(255, 255, 255, 0.8);
 }
 
 .upload-icon {
-    width: 48px;
-    height: 48px;
+    width: 42px;
+    height: 42px;
     color: var(--primary);
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
 }
 
 .drop-text {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     margin-bottom: 0.4rem;
+    color: var(--text-main);
 }
 
 .drop-text span {
     color: var(--primary);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .file-info {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
 }
 
@@ -129,10 +131,10 @@ body {
 .input-group input {
     width: 100%;
     padding: 0.85rem 1rem;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(155, 45, 114, 0.3);
     border-radius: 10px;
-    color: white;
+    color: var(--text-main);
     font-family: inherit;
     font-size: 0.95rem;
     outline: none;
@@ -148,7 +150,7 @@ body {
     margin-top: 1rem;
     padding: 0.9rem;
     background: var(--primary);
-    color: #000;
+    color: white;
     border: none;
     border-radius: 10px;
     font-weight: 600;
@@ -172,6 +174,7 @@ body {
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
     margin-top: 1rem;
+    width: 100%;
 }
 
 .preview-item {
@@ -179,7 +182,7 @@ body {
     border-radius: 8px;
     overflow: hidden;
     position: relative;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(155, 45, 114, 0.2);
 }
 
 .preview-item img {
@@ -197,15 +200,15 @@ body {
 }
 
 .status-message.success {
-    background: rgba(34, 197, 94, 0.1);
-    color: #4ade80;
-    border: 1px solid rgba(34, 197, 94, 0.2);
+    background: rgba(34, 197, 94, 0.15);
+    color: #14532d;
+    border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
 .status-message.error {
-    background: rgba(239, 68, 68, 0.1);
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.15);
+    color: #7f1d1d;
+    border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .hidden {
