@@ -15,25 +15,24 @@
     padding: 0;
 }
 
-html {
-    height: 100%;
-}
-
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    /* Fondo adaptable que cubre toda la pantalla sin cortarse */
+    
+    /* FONDO PERFECTO: Centrado absoluto, cubriendo toda la pantalla y con zoom dinámico */
     background: linear-gradient(rgba(255, 199, 235, 0.85), rgba(255, 199, 235, 0.85)), url('quince.jpg');
     background-size: cover;
-    background-position: center top;
+    background-position: center center; /* <-- Centrado total para que se adapte perfecto */
     background-repeat: no-repeat;
-    min-height: 100%;
+    background-attachment: fixed;
+    animation: bgZoom 25s ease-in-out infinite alternate;
     
     color: var(--text-main);
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    padding: 1.5rem 1rem;
+    padding: 2rem 1rem;
     position: relative;
     overflow-x: hidden;
 }
@@ -57,7 +56,8 @@ body {
     flex-direction: column;
     gap: 1.5rem;
     z-index: 2;
-    margin: auto 0; /* Centra el contenido perfectamente vertical en cualquier pantalla */
+    margin-top: auto;
+    margin-bottom: auto;
 }
 
 .header {
@@ -73,10 +73,10 @@ body {
     font-weight: 600;
 }
 
-/* TÍTULO FLOTANTE */
+/* TÍTULO CON ANIMACIÓN FLOTANTE */
 .header h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 3.2rem;
+    font-size: 3.5rem;
     font-weight: 700;
     margin: 0.2rem 0 0.6rem 0;
     color: var(--text-main);
@@ -170,7 +170,7 @@ body {
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
-    transition: background 0.30s, transform 0.2s;
+    transition: background 0.3s, transform 0.2s;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -233,7 +233,7 @@ footer {
     text-align: center;
     color: var(--text-muted);
     font-size: 0.85rem;
-    margin-top: 1.5rem;
+    margin-top: 2rem;
     text-shadow: 0 1px 4px rgba(255, 255, 255, 0.5);
     z-index: 2;
 }
@@ -241,5 +241,10 @@ footer {
 /* --- ANIMACIONES --- */
 @keyframes float {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
+    50% { transform: translateY(-8px); }
+}
+
+@keyframes bgZoom {
+    0% { background-size: 100% auto; }
+    100% { background-size: 112% auto; }
 }
