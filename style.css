@@ -41,6 +41,7 @@ body::before {
     background-position: top center;
     background-repeat: no-repeat;
     z-index: -2;
+    pointer-events: none;
 }
 
 .background-glow {
@@ -53,6 +54,7 @@ body::before {
     height: 400px;
     background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, rgba(0,0,0,0) 70%);
     z-index: -1;
+    pointer-events: none;
 }
 
 .container {
