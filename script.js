@@ -22,9 +22,14 @@ fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
 
 function handleFiles(files) {
     for (let file of files) {
-        // Valida que sea imagen o video
         if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) continue;
         
+        // Validación de seguridad para videos (máximo aprox. 1 minuto / 60MB)
+        if (file.type.startsWith('video/') && file.size > 60 * 1024 * 1024) {
+            alert(`El video "${file.name}" supera 1 minuto o es muy pesado. Por favor, elige un video más corto.`);
+            continue;
+        }
+
         selectedFiles.push(file);
         
         const reader = new FileReader();
@@ -53,7 +58,7 @@ uploadForm.addEventListener('submit', async (e) => {
     if (selectedFiles.length === 0) return;
 
     submitBtn.disabled = true;
-    submitBtn.querySelector('span').textContent = 'Subiendo recuerdos... 🎥';
+    submitBtn.querySelector('span').textContent = 'Subiendo recuerdos... 🚀';
     statusMessage.className = 'status-message hidden';
 
     let guestName = guestNameInput.value.trim() || "Fiesta";
@@ -61,7 +66,8 @@ uploadForm.addEventListener('submit', async (e) => {
 
     try {
         let successCount = 0;
-        const batchSize = 3; // Lotes pequeños ideales para procesar videos sin congelar
+        let failCount = 0;
+        const batchSize = 2; // Lotes seguros para procesar rápido
 
         for (let i = 0; i < selectedFiles.length; i += batchSize) {
             const batch = selectedFiles.slice(i, i + batchSize);
@@ -71,10 +77,8 @@ uploadForm.addEventListener('submit', async (e) => {
                     let base64Data = "";
                     
                     if (file.type.startsWith('image/')) {
-                        // Comprimir imagen para que vuele
                         base64Data = await resizeAndCompressImage(file, 1200, 0.75);
                     } else {
-                        // Si es video, lo leemos directamente
                         base64Data = await toBase64(file);
                     }
 
@@ -99,11 +103,15 @@ uploadForm.addEventListener('submit', async (e) => {
             });
 
             const results = await Promise.all(batchPromises);
-            successCount += results.filter(Boolean).length;
+            successCount += results.filter(res => res === true).length;
+            failCount += results.filter(res => res === false).length;
         }
 
         if (successCount > 0) {
-            statusMessage.textContent = `¡Listo! Se subieron ${successCount} archivos exitosamente. ✨`;
+            statusMessage.textContent = `¡Listo! Se subieron ${successCount} archivos con éxito. ✨`;
+            if (failCount > 0) {
+                statusMessage.textContent += ` (${failCount} archivo(s) fallaron).`;
+            }
             statusMessage.className = 'status-message success';
             selectedFiles = [];
             previewContainer.innerHTML = '';
@@ -114,7 +122,7 @@ uploadForm.addEventListener('submit', async (e) => {
 
     } catch (err) {
         console.error("Error general:", err);
-        statusMessage.textContent = 'Hubo un error al subir los archivos. Revisa tu conexión.';
+        statusMessage.textContent = 'La subida tardó demasiado o falló. Intenta subir menos archivos a la vez.';
         statusMessage.className = 'status-message error';
         submitBtn.disabled = false;
         submitBtn.querySelector('span').textContent = 'Reintentar';
