@@ -6,7 +6,7 @@ const uploadForm = document.getElementById('uploadForm');
 const submitBtn = document.getElementById('submitBtn');
 const previewContainer = document.getElementById('previewContainer');
 const statusMessage = document.getElementById('statusMessage');
-const guestNameInput = document.getElementById('guestName'); // <-- Aquí se conecta con el campo de texto del HTML
+const guestNameInput = document.getElementById('guestName');
 
 let selectedFiles = [];
 
@@ -61,26 +61,24 @@ uploadForm.addEventListener('submit', async (e) => {
     submitBtn.querySelector('span').textContent = 'Subiendo recuerdos... 📸';
     statusMessage.className = 'status-message hidden';
 
-    let successCount = 0;
-
-    // --- AQUÍ ES DONDE RECOGE EL NOMBRE O APODO ---
+    // Recoger y formatear el nombre o apodo
     let guestName = guestNameInput.value.trim();
     if (guestName === "") {
-        guestName = "Fiesta"; // Si no escribe nada, se llamará "Fiesta"
+        guestName = "Fiesta";
     } else {
-        guestName = guestName.replace(/\s+/g, '_'); // Reemplaza espacios por guiones bajos
+        guestName = guestName.replace(/\s+/g, '_');
     }
-    // ---------------------------------------------
 
-    for (let file of selectedFiles) {
-        try {
+    try {
+        // Subida en paralelo: Todas las fotos se envían al mismo tiempo
+        const uploadPromises = selectedFiles.map(async (file) => {
             const base64Data = await toBase64(file);
             const base64Clean = base64Data.split(',')[1]; 
 
             const formData = new URLSearchParams();
             formData.append('base64', base64Clean);
             formData.append('type', file.type || 'image/jpeg');
-            formData.append('name', guestName); // <-- Aquí envía el nombre capturado a Google
+            formData.append('name', guestName);
 
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
@@ -88,19 +86,25 @@ uploadForm.addEventListener('submit', async (e) => {
             });
             
             const result = await response.json();
-            if (result.status === 'success') successCount++;
-        } catch (err) {
-            console.error("Error subiendo archivo:", err);
-        }
-    }
+            return result.status === 'success';
+        });
 
-    if (successCount > 0) {
-        statusMessage.textContent = `¡Listo! Se subieron ${successCount} fotos exitosamente a la carpeta de Valentina. ✨`;
-        statusMessage.className = 'status-message success';
-        selectedFiles = [];
-        previewContainer.innerHTML = '';
-        submitBtn.querySelector('span').textContent = 'Subir más fotos';
-    } else {
+        // Esperar a que terminen de enviarse todas de golpe
+        const results = await Promise.all(uploadPromises);
+        const successCount = results.filter(Boolean).length;
+
+        if (successCount > 0) {
+            statusMessage.textContent = `¡Listo! Se subieron ${successCount} fotos exitosamente a la carpeta de Valentina. ✨`;
+            statusMessage.className = 'status-message success';
+            selectedFiles = [];
+            previewContainer.innerHTML = '';
+            submitBtn.querySelector('span').textContent = 'Subir más fotos';
+        } else {
+            throw new Error("Ninguna foto pudo ser procesada.");
+        }
+
+    } catch (err) {
+        console.error("Error subiendo archivos:", err);
         statusMessage.textContent = 'Hubo un error al subir las fotos. Revisa tu conexión.';
         statusMessage.className = 'status-message error';
         submitBtn.disabled = false;
