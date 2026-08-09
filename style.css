@@ -17,12 +17,14 @@
 
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    /* Fondo con foto translúcida y capa rosa por encima */
+    
+    /* FOTO DE FONDO DINÁMICA: Centrada arriba para que siempre se vea la cara */
     background: linear-gradient(rgba(255, 199, 235, 0.85), rgba(255, 199, 235, 0.85)), url('quince.jpg');
     background-size: cover;
-    background-position: center;
+    background-position: center top; /* <-- AQUÍ ESTÁ EL TRUCO PARA EL MÓVIL (enfoca la cara) */
     background-repeat: no-repeat;
     background-attachment: fixed;
+    animation: bgZoom 20s ease-in-out infinite alternate; /* Efecto dinámico de zoom lento */
     
     color: var(--text-main);
     min-height: 100vh;
@@ -53,6 +55,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    z-index: 2; /* Asegura que esté por encima del fondo */
 }
 
 .header {
@@ -68,7 +71,7 @@ body {
     font-weight: 600;
 }
 
-/* TÍTULO MÁS GRANDE Y CON ANIMACIÓN FLOTANTE */
+/* TÍTULO CON ANIMACIÓN FLOTANTE */
 .header h1 {
     font-family: 'Playfair Display', serif;
     font-size: 3.5rem;
@@ -230,10 +233,16 @@ footer {
     font-size: 0.85rem;
     margin-top: 2rem;
     text-shadow: 0 1px 4px rgba(255, 255, 255, 0.5);
+    z-index: 2;
 }
 
-/* ANIMACIÓN FLOTANTE */
+/* --- ANIMACIONES --- */
 @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-8px); }
+}
+
+@keyframes bgZoom {
+    0% { background-size: 100% auto; }
+    100% { background-size: 115% auto; }
 }
