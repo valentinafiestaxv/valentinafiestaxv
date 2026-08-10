@@ -241,7 +241,6 @@ body::before {
     object-fit: cover;
 }
 
-/* Botón de eliminar (X) en cada miniatura */
 .delete-btn {
     position: absolute;
     top: 5px;
