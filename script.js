@@ -7,6 +7,9 @@ const submitBtn = document.getElementById('submitBtn');
 const previewContainer = document.getElementById('previewContainer');
 const statusMessage = document.getElementById('statusMessage');
 const guestNameInput = document.getElementById('guestName');
+const progressContainer = document.getElementById('progressContainer');
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
 
 let selectedFiles = [];
 
@@ -24,9 +27,8 @@ function handleFiles(files) {
     for (let file of files) {
         if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) continue;
         
-        // Validación de seguridad para videos (máximo aprox. 1 minuto / 60MB)
         if (file.type.startsWith('video/') && file.size > 60 * 1024 * 1024) {
-            alert(`El video "${file.name}" supera 1 minuto o es muy pesado. Por favor, elige un video más corto.`);
+            alert(`El video "${file.name}" supera 1 minuto o es muy pesado. Elige un video más corto.`);
             continue;
         }
 
@@ -58,18 +60,24 @@ uploadForm.addEventListener('submit', async (e) => {
     if (selectedFiles.length === 0) return;
 
     submitBtn.disabled = true;
-    submitBtn.querySelector('span').textContent = 'Subiendo recuerdos... 🚀';
     statusMessage.className = 'status-message hidden';
+    progressContainer.classList.remove('hidden');
 
     let guestName = guestNameInput.value.trim() || "Fiesta";
     guestName = guestName.replace(/\s+/g, '_');
 
-    try {
-        let successCount = 0;
-        let failCount = 0;
-        const batchSize = 2; // Lotes seguros para procesar rápido
+    const totalFiles = selectedFiles.length;
+    let uploadedCount = 0;
+    let successCount = 0;
+    let failCount = 0;
 
-        for (let i = 0; i < selectedFiles.length; i += batchSize) {
+    // Actualiza barra inicial
+    updateProgress(0, totalFiles);
+
+    try {
+        const batchSize = 2; 
+
+        for (let i = 0; i < totalFiles; i += batchSize) {
             const batch = selectedFiles.slice(i, i + batchSize);
             
             const batchPromises = batch.map(async (file) => {
@@ -103,14 +111,20 @@ uploadForm.addEventListener('submit', async (e) => {
             });
 
             const results = await Promise.all(batchPromises);
+            
+            uploadedCount += batch.length;
             successCount += results.filter(res => res === true).length;
             failCount += results.filter(res => res === false).length;
+
+            updateProgress(Math.min(uploadedCount, totalFiles), totalFiles);
         }
+
+        progressContainer.classList.add('hidden');
 
         if (successCount > 0) {
             statusMessage.textContent = `¡Listo! Se subieron ${successCount} archivos con éxito. ✨`;
             if (failCount > 0) {
-                statusMessage.textContent += ` (${failCount} archivo(s) fallaron).`;
+                statusMessage.textContent += ` (${failCount} fallaron).`;
             }
             statusMessage.className = 'status-message success';
             selectedFiles = [];
@@ -122,12 +136,19 @@ uploadForm.addEventListener('submit', async (e) => {
 
     } catch (err) {
         console.error("Error general:", err);
-        statusMessage.textContent = 'La subida tardó demasiado o falló. Intenta subir menos archivos a la vez.';
+        progressContainer.classList.add('hidden');
+        statusMessage.textContent = 'La subida falló. Intenta subir menos archivos a la vez.';
         statusMessage.className = 'status-message error';
         submitBtn.disabled = false;
         submitBtn.querySelector('span').textContent = 'Reintentar';
     }
 });
+
+function updateProgress(current, total) {
+    const percentage = Math.round((current / total) * 100);
+    progressBar.style.width = `${percentage}%`;
+    progressText.textContent = `Subiendo archivo ${current} de ${total} (${percentage}%)`;
+}
 
 const toBase64 = file => new Promise((resolve, reject) => {
     const reader = new FileReader();
