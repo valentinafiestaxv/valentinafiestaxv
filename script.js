@@ -33,26 +33,46 @@ function handleFiles(files) {
         }
 
         selectedFiles.push(file);
-        
+    }
+    renderPreviews();
+}
+
+// Función para renderizar las previsualizaciones con botón de borrar individual
+function renderPreviews() {
+    previewContainer.innerHTML = '';
+    
+    selectedFiles.forEach((file, index) => {
         const reader = new FileReader();
         reader.onload = (e) => {
             const div = document.createElement('div');
             div.className = 'preview-item';
             
-            if (file.type.startsWith('video/')) {
-                div.innerHTML = `<video src="${e.target.result}" muted></video>`;
-            } else {
-                div.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-            }
+            let mediaHTML = file.type.startsWith('video/') 
+                ? `<video src="${e.target.result}" muted></video>` 
+                : `<img src="${e.target.result}" alt="Preview">`;
+
+            div.innerHTML = `
+                ${mediaHTML}
+                <button type="button" class="delete-btn" onclick="removeFile(${index})">✕</button>
+            `;
             previewContainer.appendChild(div);
         }
         reader.readAsDataURL(file);
-    }
-    
+    });
+
     if (selectedFiles.length > 0) {
         submitBtn.disabled = false;
         submitBtn.querySelector('span').textContent = `Subir ${selectedFiles.length} archivo(s)`;
+    } else {
+        submitBtn.disabled = true;
+        submitBtn.querySelector('span').textContent = 'Subir recuerdos';
     }
+}
+
+// Función para eliminar un archivo específico de la lista antes de subirlo
+window.removeFile = function(index) {
+    selectedFiles.splice(index, 1);
+    renderPreviews();
 }
 
 uploadForm.addEventListener('submit', async (e) => {
@@ -68,10 +88,8 @@ uploadForm.addEventListener('submit', async (e) => {
 
     const totalFiles = selectedFiles.length;
     let uploadedCount = 0;
-    let successCount = 0;
-    let failCount = 0;
+    let failedFiles = [];
 
-    // Actualiza barra inicial
     updateProgress(0, totalFiles);
 
     try {
@@ -103,41 +121,54 @@ uploadForm.addEventListener('submit', async (e) => {
                     });
                     
                     const result = await response.json();
-                    return result.status === 'success';
+                    if (result.status === 'success') {
+                        return { success: true, name: file.name };
+                    } else {
+                        return { success: false, name: file.name };
+                    }
                 } catch (err) {
                     console.error("Error en archivo individual:", err);
-                    return false;
+                    return { success: false, name: file.name };
                 }
             });
 
             const results = await Promise.all(batchPromises);
             
             uploadedCount += batch.length;
-            successCount += results.filter(res => res === true).length;
-            failCount += results.filter(res => res === false).length;
+            results.forEach(res => {
+                if (!res.success) {
+                    failedFiles.push(res.name);
+                }
+            });
 
             updateProgress(Math.min(uploadedCount, totalFiles), totalFiles);
         }
 
         progressContainer.classList.add('hidden');
+        const successCount = totalFiles - failedFiles.length;
 
-        if (successCount > 0) {
-            statusMessage.textContent = `¡Listo! Se subieron ${successCount} archivos con éxito. ✨`;
-            if (failCount > 0) {
-                statusMessage.textContent += ` (${failCount} fallaron).`;
-            }
+        if (successCount > 0 && failedFiles.length === 0) {
+            statusMessage.textContent = `¡Listo! Se subieron los ${successCount} archivos con éxito. ✨`;
             statusMessage.className = 'status-message success';
             selectedFiles = [];
             previewContainer.innerHTML = '';
             submitBtn.querySelector('span').textContent = 'Subir más recuerdos';
+        } else if (successCount > 0 && failedFiles.length > 0) {
+            statusMessage.textContent = `Se subieron ${successCount}, pero fallaron: ${failedFiles.join(', ')}.`;
+            statusMessage.className = 'status-message error';
+            submitBtn.disabled = false;
+            submitBtn.querySelector('span').textContent = 'Reintentar fallidos';
         } else {
-            throw new Error("No se pudo subir ningún archivo.");
+            statusMessage.textContent = `Error al subir los siguientes archivos: ${failedFiles.join(', ')}.`;
+            statusMessage.className = 'status-message error';
+            submitBtn.disabled = false;
+            submitBtn.querySelector('span').textContent = 'Reintentar';
         }
 
     } catch (err) {
         console.error("Error general:", err);
         progressContainer.classList.add('hidden');
-        statusMessage.textContent = 'La subida falló. Intenta subir menos archivos a la vez.';
+        statusMessage.textContent = 'Hubo un error de conexión general al procesar los archivos.';
         statusMessage.className = 'status-message error';
         submitBtn.disabled = false;
         submitBtn.querySelector('span').textContent = 'Reintentar';
